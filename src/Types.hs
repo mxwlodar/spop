@@ -51,3 +51,6 @@ type Counter = Int
 data AddressBook = AddressBook [Person] [Group] deriving (Show, Read)
 getPersons(AddressBook p _) = p
 getGroups(AddressBook _ g) = g
+
+
+emptyAddressBook = AddressBook [] []

@@ -19,13 +19,13 @@ import Data.String.Utils
 
 
 --do wywalenia jak wszystko bedzie zrobione
-todo _ = do
+todo adressBook = do
             putStrLn "!!!!!!!!!!!!!!!!!!!!"
             putStrLn "!!                !!"
             putStrLn "!!  Do zrobienia  !!"
             putStrLn "!!                !!"
             putStrLn "!!!!!!!!!!!!!!!!!!!!"
-            return null
+            return adressBook
 
 
 

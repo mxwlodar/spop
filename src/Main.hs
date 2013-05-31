@@ -27,7 +27,7 @@ import Dao
 
 main = do
       showMessageBox welcomeInfo
-      mainLoop null
+      mainLoop emptyAddressBook
 
 --Główna pętla
 mainLoop model = do
@@ -57,7 +57,7 @@ showSubmenuContactsLoop model = do
 
 --Wyświetla podmenu zarzadzania kontaktami
 submenuContacts model = do
-      function <- showMenuBox[("Dodaj nowy kontakt", todo),
+      function <- showMenuBox[("Dodaj nowy kontakt", addPerson),
             ("Modyfikuj kontakt", todo),
             ("Usuń kontakt", todo),
             ("Przypisz kontakt do grupy", todo),
