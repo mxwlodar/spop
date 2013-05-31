@@ -80,6 +80,9 @@ menuBox menuItems =
 -- Wyswietlenie komunikatu
 showMessageBox message = putStr (messageBox message)
 
-
+-- Pobranie nazwy obiektu z funkcją weryfikującą
+getObjectName objectName message = do
+    objectName <- showInputBox message
+    return (Just objectName)
 
 

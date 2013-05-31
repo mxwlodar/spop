@@ -23,6 +23,7 @@ import Ui
 import Strings
 import Utils
 import Types
+import Dao
 
 main = do
       showMessageBox welcomeInfo
