@@ -93,8 +93,6 @@ addPerson (AddressBook persons  groups)  = do
        return (AddressBook persons  groups)
     else do
 
-
-
     let newPersons = doAddPerson (getNextPersonId persons)
                                 ( fromJust maybeFirstName)
                                 ( fromJust maybeLastName)
@@ -103,7 +101,6 @@ addPerson (AddressBook persons  groups)  = do
                                 ( fromJust maybeMail)
                                 ( fromJust maybeBirthday )
                                 persons
-
     showMessageBox operationSuccessStr
     return (AddressBook newPersons  groups)
 
@@ -111,11 +108,74 @@ doAddPerson  id firstName lastName companyName phone email birthDay persons = do
         [(Person id firstName lastName companyName phone email birthDay [])] ++ persons
 
 
+modifyPersonAction (AddressBook persons  groups)  = do
+    showContactsReverse (AddressBook persons groups)
+    objectName <- showInputBox "Podaj id kontkatu"
+    let id = parseInt ( fromJust (Just objectName) )
+
+    if (id == 0)
+        then do
+            showError "Podano nieprawidłowy identyfikator"
+            showMessageBox operationFailedStr
+            return (AddressBook persons groups)
+        else do
+            let maybePerson = getPersonById id persons
+
+            if ( isNothing maybePerson )
+                then do
+                    showError "Nie znaleziono kontaktu o wskazanym identyfikatorze"
+                    showMessageBox operationFailedStr
+                    return (AddressBook persons groups)
+                else do --tutaj modyfikacja
+                  maybeFirstName <- getObjectName firstName "Podaj imie"
+                  maybeLastName <- getObjectName lastName "Podaj nazwisko"
+                  maybeCompanyName <- getObjectName companyName "Podaj nazwe firmy"
+                  maybePhone <- getObjectName phoneNumber "Podaj numer telefonu"
+                  maybeMail <- getObjectName eMail "Podaj adres email"
+                  maybeBirthdayString <- getObjectName birthDay "Podaj date urodzenia (wymagany format to YYYY-MM-DD, np. 1980-04-20)"
+
+                  let maybeBirthday = getDateWithValidation (  fromJust maybeBirthdayString )
+
+                  -- walidacja daty
+                  if  ( isNothing maybeBirthday )
+                        then do
+                            showError "Podano nieprawidłową datę"
+                        else
+                            putStr ""
+
+
+                  if isNothing maybeFirstName ||
+                     isNothing maybeLastName ||
+                     isNothing maybeCompanyName ||
+                     isNothing maybePhone ||
+                     isNothing maybeMail ||
+                     isNothing maybeBirthday
+                    then do
+                       showMessageBox operationFailedStr
+                       return (AddressBook persons  groups)
+                    else do -- stworzenie nowej osoby i zastapienie nia starej
+                       let person = fromJust maybePerson
+                       let index = fromJust( elemIndex person persons)
+                       let modifiedPerson = (Person (getPersonId person)
+                                ( fromJust maybeFirstName)
+                                ( fromJust maybeLastName)
+                                ( fromJust maybeCompanyName)
+                                ( fromJust maybePhone)
+                                ( fromJust maybeMail)
+                                ( fromJust maybeBirthday )
+                                ( getPersonGroups person)
+                                )
+                       let modifiedPersons = replaceNth index modifiedPerson persons
+                       showMessageBox operationSuccessStr
+                       return (AddressBook modifiedPersons  groups)
+
+
+
 
 --usuwa kontakt
 deletePersonAction (AddressBook persons groups) = do
     showContactsReverse (AddressBook persons groups)
-    objectName <- showInputBox "Wskaż id kontkatu"
+    objectName <- showInputBox "Podaj id kontkatu"
     let id = parseInt ( fromJust (Just objectName) )
 
     if (id == 0)
@@ -139,6 +199,7 @@ deletePersonAction (AddressBook persons groups) = do
 
 -- wyswietla osoby obchodzace urodziny
 showPersonsBirthdayAction (AddressBook persons groups) = do
+    showMessageBox "Obchodzący dzisiaj urodziny:"
     (y,m,d) <- getCurrentDate
     let birthDayPersons = filter (\p -> hasBirthDayAtDate p (fromGregorian y m d)) persons
     showContacts (reverse birthDayPersons)

@@ -66,6 +66,7 @@ data Person = Person { id :: Int,
 
 getPersonId(Person id _ _ _ _ _ _ _) = id
 getPersonBirthday(Person _ _ _ _ _ _ birthDay _) = birthDay
+getPersonGroups (Person _ _ _ _ _ _ _ groups) = groups
 
 data Group = Group Int String [Int] deriving (Show, Read, Eq)
 getGroupId (Group id _ _) = id

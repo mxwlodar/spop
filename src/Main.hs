@@ -59,7 +59,7 @@ showSubmenuContactsLoop addressBook = do
 --Wyświetla podmenu zarzadzania kontaktami
 submenuContacts addressBook = do
       function <- showMenuBox[("Dodaj nowy kontakt", addPerson),
-            ("Modyfikuj kontakt", todo),
+            ("Modyfikuj kontakt", modifyPersonAction),
             ("Usuń kontakt", deletePersonAction),
             ("Przypisz kontakt do grupy", todo),
             ("Usuń z grupy", todo),

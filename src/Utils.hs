@@ -14,6 +14,7 @@
 
 module Utils where
 import Data.Time
+import Data.List
 import Data.String.Utils
 import Numeric
 
@@ -45,6 +46,12 @@ justification = 30
 
 fill :: Char
 fill = ' '
+
+
+-- zmiana elementu w liscie na n-tej pozycji
+replaceNth n newVal (x:xs)
+     | n == 0 = newVal:xs
+     | otherwise = x:replaceNth (n-1) newVal xs
 
 -- Wczytanie obiekt Maybe z ciagu znakow
 readMaybe :: (Read a) => String -> Maybe a
