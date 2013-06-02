@@ -32,6 +32,30 @@ import Utils
 createEmptyAddressBook _ = return emptyAddressBook
 
 
+--
+getNextPersonId:: [Person] -> Int
+getNextPersonId [] = 1;
+getNextPersonId (p:ps) = (max (getPersonId p) (getNextPersonId ps))+1 ;
+
+getPersonById:: Int -> [Person] -> Maybe Person
+getPersonById id [] = Nothing
+getPersonById id (p:ps) = if (id == getPersonId p )
+                                then
+                                    Just p
+                                else
+                                    getPersonById id ps
+
+getNextGroupId:: [Group] -> Int
+getNextGroupId [] = 1;
+getNextGroupId (g:gs) = (max (getGroupId g) (getNextGroupId gs))+1 ;
+
+getGroupById:: Int -> [Group] -> Maybe Group
+getGroupById id [] = Nothing
+getGroupById id (g:gs) = if (id == getGroupId g )
+                                then
+                                    Just g
+                                else
+                                    getGroupById id gs
 
 ---Dodanie osoby
 addPerson (AddressBook persons  groups)  = do
@@ -41,23 +65,16 @@ addPerson (AddressBook persons  groups)  = do
   maybePhone <- getObjectName phoneNumber "Podaj numer telefonu"
   maybeMail <- getObjectName eMail "Podaj adres email"
   maybeBirthdayString <- getObjectName birthDay "Podaj date urodzenia (wymagany format to YYYY-MM-DD, np. 1980-04-20)"
-  let matchedDate = matchDate (fromJust maybeBirthdayString)
-  let maybeBirthday = parseDate (matchedDate);
+
+  let maybeBirthday = getDateWithValidation (  fromJust maybeBirthdayString )
 
 
   -- walidacja daty
   if  ( isNothing maybeBirthday )
-    then
-        showError "Niewłaściwy format daty"
-    else if ( validateMatchedDate matchedDate ( fromJust maybeBirthday ) )
         then do
-            let maybeBirthday = Nothing
             showError "Podano nieprawidłową datę"
         else
             putStr ""
-
-  -- walidacja maila  - musi byc unikalny
-
 
 
   if isNothing maybeFirstName ||
@@ -72,9 +89,9 @@ addPerson (AddressBook persons  groups)  = do
     else do
 
 
---    let birthDay = (20, 02, 1638);
-    --let birthDay = fromGregorian 1988 20 02
-    let newPersons = doAddPerson ( fromJust maybeFirstName)
+
+    let newPersons = doAddPerson (getNextPersonId persons)
+                                ( fromJust maybeFirstName)
                                 ( fromJust maybeLastName)
                                 ( fromJust maybeCompanyName)
                                 ( fromJust maybePhone)
@@ -85,8 +102,9 @@ addPerson (AddressBook persons  groups)  = do
     showMessageBox operationSuccessStr
     return (AddressBook newPersons  groups)
 
-doAddPerson  firstName lastName companyName phone email birthDay persons = do
-        [(Person firstName lastName companyName phone email birthDay [])] ++ persons
+doAddPerson  id firstName lastName companyName phone email birthDay persons = do
+        [(Person id firstName lastName companyName phone email birthDay [])] ++ persons
+
 
 
 

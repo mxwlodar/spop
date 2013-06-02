@@ -14,6 +14,7 @@
 
 module Types where
 import Data.Time
+import Data.Maybe
 import Data.Char
 import Numeric
 import Text.Regex.Posix
@@ -21,13 +22,13 @@ import Text.Regex.Posix
 
 -- tutaj beda zdefiniowane nasze typy danych
 
-type Date = (Int, Int, Int)
 
 
-
+--dopasowuje date za pomoca wyrazenia regularnego
 matchDate :: String  -> [String]
 matchDate str = getAllTextMatches $ str =~ "[0-9]+" :: [String]
 
+--parsuje date za pomoca listy dopasowania z wyrazenia regularnego
 parseDate :: [String] -> Maybe Day
 parseDate (y:m:d:_) = Just (fromGregorian (toInteger (read y ::Int)) (read m ::Int) (read d ::Int))
 parseDate _ = Nothing
@@ -39,23 +40,36 @@ validateMatchedDate (y:m:d:_) date = (length y == 4) && (length m == 2) && (leng
                                           (y2,m2,d2) = toGregorian date
 validateMatchedDate _ _ = False
 
-
+--zwraca date sparsowana ze string lub nothing w razie niepowodzenia
+getDateWithValidation:: String -> Maybe Day
+getDateWithValidation str = if ( not( validateMatchedDate matchedDate ( fromJust maybeDate )) )
+                then
+                    Nothing
+                else
+                    maybeDate
+                        where
+                            matchedDate = matchDate str
+                            maybeDate = parseDate (matchedDate);
 
 
 
 type ID = Int
-data Person = Person { firstName :: String,
+data Person = Person { id :: Int,
+                       firstName :: String,
                        lastName :: String,
                        companyName :: String,
                        phoneNumber :: String,
                        eMail :: String,
                        birthDay :: Day,
-                       groups :: [Group]
+                       groups :: [Int]
                      } deriving (Show, Read)
 
-data Group = Group String [Person] deriving (Show, Read)
-getGroupName (Group s _) = s
-getPersonsInGroup (Group _ p) = p
+getPersonId(Person id _ _ _ _ _ _ _) = id
+
+data Group = Group Int String [Int] deriving (Show, Read)
+getGroupId (Group id _ _) = id
+getGroupName (Group _ s _) = s
+getPersonsInGroup (Group _ _ p) = p
 
 type Counter = Int
 data AddressBook = AddressBook [Person] [Group] deriving (Show, Read)

@@ -83,6 +83,15 @@ getObjectName objectName message = do
     objectName <- showInputBox message
     return (Just objectName)
 
+-- Pobranie nazwy obiektu z funkcją weryfikującą
+getObjectNameWithValidate objectNames checkFunction message = do
+    objectName <- showInputBox message
+    if checkFunction objectName objectNames
+        then
+            return (Just objectName)
+        else
+            return Nothing
+
 -- Wyświetlenie polecenia zachęty dla wczytania pliku
 showFileInputBox = showInputBox "Podaj ścieżkę do pliku"
 
