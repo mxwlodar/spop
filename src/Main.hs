@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP, TemplateHaskell #-}
 -----------------------------------------------------------------------------
 --
 -- Module      :  Main
@@ -25,65 +24,67 @@ import Utils
 import Types
 import Dao
 
+
 main = do
       showMessageBox welcomeInfo
       mainLoop emptyAddressBook
 
 --Główna pętla
-mainLoop model = do
+mainLoop addressBook = do
         printNewLine
         function <- showMainMenu
-        model <- function model
-        mainLoop model
+        addressBook <- function addressBook
+        mainLoop addressBook
 
 showMainMenu = do
          showMenuBox [("Zarządzanie kontaktami", showSubmenuContactsLoop),
             ("Zarządzanie grupami", showSubmenuGroupsLoop),
             ("Wyszukiwanie kontaktów",todo),
             ("Wyświetlenie osób obchodzących dzisiaj urodziny",todo),
-            ("Zapis danych do pliku",  todo),
-            ("Odczyt danych z pliku", todo),
-            ("Wyczyszczenie danych", todo),
+            ("Pokaz wszystkie dane",  showData), -- do wywalenia pod koniec
+            ("Zapis danych do pliku",  saveData),
+            ("Odczyt danych z pliku", loadData),
+            ("Wyczyszczenie danych", createEmptyAddressBook),
             ("Zakończ", exit)]
 
 
 --------------------------------------------------------------------------------
 
 --- Zarzadanie kontaktami
-showSubmenuContactsLoop model = do
+showSubmenuContactsLoop addressBook = do
       printNewLine
-      model <- submenuContacts model
-      showSubmenuContactsLoop model
+      addressBook <- submenuContacts addressBook
+      showSubmenuContactsLoop addressBook
 
 --Wyświetla podmenu zarzadzania kontaktami
-submenuContacts model = do
+submenuContacts addressBook = do
       function <- showMenuBox[("Dodaj nowy kontakt", addPerson),
             ("Modyfikuj kontakt", todo),
             ("Usuń kontakt", todo),
             ("Przypisz kontakt do grupy", todo),
             ("Usuń z grupy", todo),
             ("Powrót do menu głównego", mainLoop)]
-      model <- function model
-      return model
+      addressBook <- function addressBook
+      return addressBook
 
 
 --------------------------------------------------------------------------------
 
 --- Zarzadanie grupami
-showSubmenuGroupsLoop model = do
+showSubmenuGroupsLoop addressBook = do
       printNewLine
-      model <- submenuGroups model
-      showSubmenuGroupsLoop model
+      model <- submenuGroups addressBook
+      showSubmenuGroupsLoop addressBook
 
---Wyświetla podmenu zarzadzania kontaktami
-submenuGroups model = do
+--Wyświetla podmenu zarzadzania grupami
+submenuGroups addressBook = do
       function <- showMenuBox[("Dodaj nową grupę", todo),
             ("Modyfikuj grupę", todo),
             ("Usuń grupę", todo),
             ("Scal dwie grupy w nową grupę", todo),
             ("Powrót do menu głównego", mainLoop)]
-      model <- function model
-      return model
+      addressBook <- function addressBook
+      return addressBook
 
 --------------------------------------------------------------------------------
 

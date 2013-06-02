@@ -13,25 +13,35 @@
 -----------------------------------------------------------------------------
 
 module Types where
-
+import Data.Time
 import Data.Char
-import Text.Printf
 import Numeric
+import Text.Regex.Posix
+
+
 -- tutaj beda zdefiniowane nasze typy danych
 
 type Date = (Int, Int, Int)
 
-parseDate :: String -> Date
-parseDate s = (y,m,d)
-    where [(m,rest) ] = readDec (filter (not . isSpace) s)
-          [(d,rest1)] = readDec (tail rest)
-          [(y, _)   ] = readDec rest1
 
-showDate::(Int, Int, Int) -> String
-showDate (y,m,d)= yy ++ '-':mm ++ '-':dd
-    where dd = show d
-          mm = show m
-          yy = show y
+
+matchDate :: String  -> [String]
+matchDate str = getAllTextMatches $ str =~ "[0-9]+" :: [String]
+
+parseDate :: [String] -> Maybe Day
+parseDate (y:m:d:_) = Just (fromGregorian (toInteger (read y ::Int)) (read m ::Int) (read d ::Int))
+parseDate _ = Nothing
+
+--sprawdza czy sparsowana data jest zgodna z ta wpisana w stringu - eleminuje daty typu 30 lutego
+validateMatchedDate :: [String] -> Day -> Bool
+validateMatchedDate (y:m:d:_) date = (length y == 4) && (length m == 2) && (length d == 2) && (y1 == y2) && (m1 == m2) && (d1 == d2)
+                                    where (y1,m1,d1) = (toInteger (read y ::Int), read m ::Int, read d ::Int)
+                                          (y2,m2,d2) = toGregorian date
+validateMatchedDate _ _ = False
+
+
+
+
 
 type ID = Int
 data Person = Person { firstName :: String,
@@ -39,7 +49,7 @@ data Person = Person { firstName :: String,
                        companyName :: String,
                        phoneNumber :: String,
                        eMail :: String,
-                       birthDay :: Date,
+                       birthDay :: Day,
                        groups :: [Group]
                      } deriving (Show, Read)
 

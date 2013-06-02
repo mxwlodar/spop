@@ -19,14 +19,23 @@ import Data.String.Utils
 
 
 --do wywalenia jak wszystko bedzie zrobione
-todo adressBook = do
+todo addressBook = do
             putStrLn "!!!!!!!!!!!!!!!!!!!!"
             putStrLn "!!                !!"
             putStrLn "!!  Do zrobienia  !!"
             putStrLn "!!                !!"
             putStrLn "!!!!!!!!!!!!!!!!!!!!"
-            return adressBook
+            return addressBook
 
+--do wywalenia jak wszystko bedzie zrobione
+showData addressBook = do
+            putStrLn "!!!!!!!!!!!!!!!!!!!!"
+            putStrLn "!!                !!"
+            putStrLn "!! Pogladowe dane !!"
+            putStrLn "!!                !!"
+            putStrLn "!!!!!!!!!!!!!!!!!!!!"
+            print addressBook
+            return addressBook
 
 
 --Stale

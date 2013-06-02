@@ -20,9 +20,7 @@ import Data.String.Utils
 import Strings
 import Utils
 
--- Do jednolitego wyswietlania komunikatow bledow
-errorStr msg = "Błąd: " ++ msg
-showError msg = errorStr msg
+
 
 -- Stworzenie obramowanego komunikatu
 messageBox "" = ""
@@ -84,5 +82,8 @@ showMessageBox message = putStr (messageBox message)
 getObjectName objectName message = do
     objectName <- showInputBox message
     return (Just objectName)
+
+-- Wyświetlenie polecenia zachęty dla wczytania pliku
+showFileInputBox = showInputBox "Podaj ścieżkę do pliku"
 
 

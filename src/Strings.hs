@@ -14,6 +14,10 @@
 
 module Strings where
 
+-- Do jednolitego wyswietlania komunikatow bledow
+errorStr msg = "Błąd: " ++ msg
+showError msg = putStrLn (errorStr msg)
+
 
 
 welcomeInfo = "SPOP2013L - Marcin Włodarczyk && Piotr Cebulski"
@@ -23,9 +27,6 @@ operationSuccessStr = "Pomyślnie wykonano operację"
 operationFailedStr = "Wykonanie operacji nie powiodło się..."
 
 
-
-optionMainShowBirthdayPersons = "Wyświetl obchodzących dzisiaj urodziny"
-
-
-optionMainAddNewContact = "Dodaj nowy kontakt";
-optionMainAddNewGroup = "Dodaj nową grupę"
+--Błędy IO
+invalidFormatErrorStr =  errorStr "Nieprawidłowy format danych"
+cannotOpenFileErrorStr = errorStr "Nie można odczytać pliku"
