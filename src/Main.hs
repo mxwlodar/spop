@@ -41,7 +41,7 @@ showMainMenu = do
             ("Zarządzanie grupami", showSubmenuGroupsLoop),
             ("Wyszukiwanie kontaktów",todo),
             ("Wyświetlenie osób obchodzących dzisiaj urodziny",todo),
-            ("Pokaz wszystkie dane",  showData), -- do wywalenia pod koniec
+            ("Pokaz wszystkie dane",  showContactsReverse),
             ("Zapis danych do pliku",  saveData),
             ("Odczyt danych z pliku", loadData),
             ("Wyczyszczenie danych", createEmptyAddressBook),
@@ -60,7 +60,7 @@ showSubmenuContactsLoop addressBook = do
 submenuContacts addressBook = do
       function <- showMenuBox[("Dodaj nowy kontakt", addPerson),
             ("Modyfikuj kontakt", todo),
-            ("Usuń kontakt", todo),
+            ("Usuń kontakt", deletePersonAction),
             ("Przypisz kontakt do grupy", todo),
             ("Usuń z grupy", todo),
             ("Powrót do menu głównego", mainLoop)]

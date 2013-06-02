@@ -62,11 +62,11 @@ data Person = Person { id :: Int,
                        eMail :: String,
                        birthDay :: Day,
                        groups :: [Int]
-                     } deriving (Show, Read)
+                     } deriving (Show, Read, Eq)
 
 getPersonId(Person id _ _ _ _ _ _ _) = id
 
-data Group = Group Int String [Int] deriving (Show, Read)
+data Group = Group Int String [Int] deriving (Show, Read, Eq)
 getGroupId (Group id _ _) = id
 getGroupName (Group _ s _) = s
 getPersonsInGroup (Group _ _ p) = p

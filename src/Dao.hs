@@ -15,11 +15,13 @@
 module Dao where
 import Data.Maybe
 import Data.Time
+import Data.List
 import Types
 import Strings
+import Numeric
 import Ui
 import Utils
-
+import Data.Typeable
 
 
 
@@ -32,11 +34,12 @@ import Utils
 createEmptyAddressBook _ = return emptyAddressBook
 
 
---
+-- wygeneruj nastepny id osoby
 getNextPersonId:: [Person] -> Int
 getNextPersonId [] = 1;
 getNextPersonId (p:ps) = (max (getPersonId p) (getNextPersonId ps))+1 ;
 
+-- zwraca osobe na podstawie identyfikatora
 getPersonById:: Int -> [Person] -> Maybe Person
 getPersonById id [] = Nothing
 getPersonById id (p:ps) = if (id == getPersonId p )
@@ -45,10 +48,12 @@ getPersonById id (p:ps) = if (id == getPersonId p )
                                 else
                                     getPersonById id ps
 
+-- wygeneruj nastepny id grupy
 getNextGroupId:: [Group] -> Int
 getNextGroupId [] = 1;
 getNextGroupId (g:gs) = (max (getGroupId g) (getNextGroupId gs))+1 ;
 
+-- zwraca osobe na podstawie identyfikatora
 getGroupById:: Int -> [Group] -> Maybe Group
 getGroupById id [] = Nothing
 getGroupById id (g:gs) = if (id == getGroupId g )
@@ -106,6 +111,54 @@ doAddPerson  id firstName lastName companyName phone email birthDay persons = do
         [(Person id firstName lastName companyName phone email birthDay [])] ++ persons
 
 
+
+--usuwa kontakt
+deletePersonAction (AddressBook persons groups) = do
+            showContactsReverse (AddressBook persons groups)
+
+            objectName <- showInputBox "Wskaż id kontkatu"
+            let id = parseInt ( fromJust (Just objectName) )
+
+            if (id == 0)
+                then do
+                    showError "Podano nieprawidłowy identyfikator"
+                    showMessageBox operationFailedStr
+                    return (AddressBook persons groups)
+                else do
+                    let maybePerson = getPersonById id persons
+
+                    if ( isNothing maybePerson )
+                        then do
+                            showError "Nie znaleziono kontaktu o wskazanym identyfikatorze"
+                            showMessageBox operationFailedStr
+                            return (AddressBook persons groups)
+                        else do
+                            let restPersons = removeItem (fromJust maybePerson) persons
+                            showMessageBox operationSuccessStr
+                            return (AddressBook restPersons groups)
+
+
+
+--wyswietlenie listy kontaktow
+showContactsReverse (AddressBook persons groups) = do
+            showMessageBox "Lista kontaktow:"
+            showContacts (reverse persons)
+            return (AddressBook persons groups)
+
+-- wywietla kontakty
+showContacts [] = putStr "";
+showContacts (p:ps) = do
+            showContact(p)
+            showContacts (ps)
+
+-- wyswietla kontakt
+showContact (Person id firstName lastName companyName phone email birthDay []) = do
+            putStrLn ("id: " ++ (show id))
+            putStrLn ("Imię i nazwisko: " ++firstName ++ " " ++ lastName)
+            putStrLn ("Firma: " ++ companyName)
+            putStrLn ("Telefon: " ++ phone)
+            putStrLn ("Email: " ++ email)
+            putStrLn ("Data urodzenia: " ++ (show birthDay) ++ "\n\n" )
 
 
 -- Zapis danych do pliku

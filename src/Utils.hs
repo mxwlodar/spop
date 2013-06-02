@@ -15,6 +15,7 @@
 module Utils where
 
 import Data.String.Utils
+import Numeric
 
 
 
@@ -129,3 +130,13 @@ middle (x:xs) = init xs
 centerEach justification fill list = map (center justification fill) list
 format justification fill fields = concat (centerEach justification fill fields)
 formatField = format justification fill
+
+
+-- parsuje inta ze stringa
+parseInt:: String -> Int
+parseInt str = parseIntWithDefValue (readDec str) 0
+parseIntWithDefValue [] def = def
+parseIntWithDefValue [(id, _)] def = id
+
+
+
