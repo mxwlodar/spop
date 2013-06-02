@@ -13,7 +13,7 @@
 -----------------------------------------------------------------------------
 
 module Utils where
-
+import Data.Time
 import Data.String.Utils
 import Numeric
 
@@ -138,5 +138,7 @@ parseInt str = parseIntWithDefValue (readDec str) 0
 parseIntWithDefValue [] def = def
 parseIntWithDefValue [(id, _)] def = id
 
-
+-- zwraca obecna date
+getCurrentDate :: IO (Integer,Int,Int) -- :: (year,month,day)
+getCurrentDate = getCurrentTime >>= return . toGregorian . utctDay
 

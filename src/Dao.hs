@@ -114,32 +114,45 @@ doAddPerson  id firstName lastName companyName phone email birthDay persons = do
 
 --usuwa kontakt
 deletePersonAction (AddressBook persons groups) = do
-            showContactsReverse (AddressBook persons groups)
+    showContactsReverse (AddressBook persons groups)
+    objectName <- showInputBox "Wskaż id kontkatu"
+    let id = parseInt ( fromJust (Just objectName) )
 
-            objectName <- showInputBox "Wskaż id kontkatu"
-            let id = parseInt ( fromJust (Just objectName) )
+    if (id == 0)
+        then do
+            showError "Podano nieprawidłowy identyfikator"
+            showMessageBox operationFailedStr
+            return (AddressBook persons groups)
+        else do
+            let maybePerson = getPersonById id persons
 
-            if (id == 0)
+            if ( isNothing maybePerson )
                 then do
-                    showError "Podano nieprawidłowy identyfikator"
+                    showError "Nie znaleziono kontaktu o wskazanym identyfikatorze"
                     showMessageBox operationFailedStr
                     return (AddressBook persons groups)
                 else do
-                    let maybePerson = getPersonById id persons
-
-                    if ( isNothing maybePerson )
-                        then do
-                            showError "Nie znaleziono kontaktu o wskazanym identyfikatorze"
-                            showMessageBox operationFailedStr
-                            return (AddressBook persons groups)
-                        else do
-                            let restPersons = removeItem (fromJust maybePerson) persons
-                            showMessageBox operationSuccessStr
-                            return (AddressBook restPersons groups)
+                    let restPersons = removeItem (fromJust maybePerson) persons
+                    showMessageBox operationSuccessStr
+                    return (AddressBook restPersons groups)
 
 
+-- wyswietla osoby obchodzace urodziny
+showPersonsBirthdayAction (AddressBook persons groups) = do
+    (y,m,d) <- getCurrentDate
+    let birthDayPersons = filter (\p -> hasBirthDayAtDate p (fromGregorian y m d)) persons
+    showContacts (reverse birthDayPersons)
+    return (AddressBook persons groups)
 
---wyswietlenie listy kontaktow
+-- sprawdza czy osoba ma dzisiaj urodziny
+hasBirthDayAtDate :: Person -> Day -> Bool
+hasBirthDayAtDate p date = (yp == y) && (mp == m) && (dp == d)
+                where
+                    (y, m, d) = toGregorian date
+                    (yp, mp, dp) = toGregorian (getPersonBirthday p)
+
+
+-- wyswietlenie listy kontaktow
 showContactsReverse (AddressBook persons groups) = do
             showMessageBox "Lista kontaktow:"
             showContacts (reverse persons)

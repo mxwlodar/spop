@@ -40,7 +40,7 @@ showMainMenu = do
          showMenuBox [("Zarządzanie kontaktami", showSubmenuContactsLoop),
             ("Zarządzanie grupami", showSubmenuGroupsLoop),
             ("Wyszukiwanie kontaktów",todo),
-            ("Wyświetlenie osób obchodzących dzisiaj urodziny",todo),
+            ("Wyświetlenie osób obchodzących dzisiaj urodziny",showPersonsBirthdayAction),
             ("Pokaz wszystkie dane",  showContactsReverse),
             ("Zapis danych do pliku",  saveData),
             ("Odczyt danych z pliku", loadData),
