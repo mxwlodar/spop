@@ -53,7 +53,7 @@ getNextGroupId:: [Group] -> Int
 getNextGroupId [] = 1;
 getNextGroupId (g:gs) = (max (getGroupId g) (getNextGroupId gs))+1 ;
 
--- zwraca osobe na podstawie identyfikatora
+-- zwraca grupe na podstawie identyfikatora
 getGroupById:: Int -> [Group] -> Maybe Group
 getGroupById id [] = Nothing
 getGroupById id (g:gs) = if (id == getGroupId g )
@@ -261,3 +261,65 @@ loadData addressBook = doLoadData addressBook
                      readmaybeAddressBook :: String -> Maybe AddressBook
                      readmaybeAddressBook = readMaybe
 
+--GRUPY
+----------------------------------------------------------------------------------------------------
+-- wyswietlenie listy grup
+showGroupsReverse (AddressBook persons groups) = do
+            showMessageBox "Lista grup:"
+            showGroups (reverse groups)
+            return (AddressBook persons groups)
+
+-- wywietla grupy
+showGroups [] = putStr "";
+showGroups (g:gs) = do
+            showGroup(g)
+            showGroups(gs)
+
+-- wyswietla grupe
+showGroup (Group groupId groupName) = do
+            putStrLn ("id: " ++ (show groupId))
+            putStrLn ("Nazwa: " ++groupName)
+
+---Dodanie grupy
+addGroup (AddressBook persons  groups)  = do
+  maybeGroupName <- getObjectName groupName "Podaj nazwe grupy"
+
+  if isNothing maybeGroupName
+    then do
+       showMessageBox operationFailedStr
+       return (AddressBook persons  groups)
+    else do
+
+    let newGroups = doAddGroup (getNextGroupId groups)
+                               ( fromJust maybeGroupName)                                groups
+    showMessageBox operationSuccessStr
+    showGroupsReverse (AddressBook persons newGroups)
+    return (AddressBook persons  newGroups)
+
+doAddGroup groupId groupName groups = do
+        [(Group groupId groupName)] ++ groups
+
+--usuwa grupe
+deleteGroupAction (AddressBook persons groups) = do
+    showGroupsReverse (AddressBook persons groups)
+    return (AddressBook persons groups)
+    objectName <- showInputBox "Podaj id grupy"
+    let groupId = parseInt ( fromJust (Just objectName) )
+
+    if (groupId == 0)
+        then do
+            showError "Podano nieprawidłowy identyfikator"
+            showMessageBox operationFailedStr
+            return (AddressBook persons groups)
+        else do
+            let maybeGroup = getGroupById groupId groups
+
+            if ( isNothing maybeGroup )
+                then do
+                    showError "Nie znaleziono grupy o wskazanym identyfikatorze"
+                    showMessageBox operationFailedStr
+                    return (AddressBook persons groups)
+                else do
+                    let restGroups = removeItem (fromJust maybeGroup) groups
+                    showMessageBox operationSuccessStr
+                    return (AddressBook persons restGroups)

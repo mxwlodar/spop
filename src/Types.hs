@@ -53,7 +53,6 @@ getDateWithValidation str = if ( not( validateMatchedDate matchedDate ( fromJust
 
 
 
-type ID = Int
 data Person = Person { id :: Int,
                        firstName :: String,
                        lastName :: String,
@@ -68,12 +67,12 @@ getPersonId(Person id _ _ _ _ _ _ _) = id
 getPersonBirthday(Person _ _ _ _ _ _ birthDay _) = birthDay
 getPersonGroups (Person _ _ _ _ _ _ _ groups) = groups
 
-data Group = Group Int String [Int] deriving (Show, Read, Eq)
-getGroupId (Group id _ _) = id
-getGroupName (Group _ s _) = s
-getPersonsInGroup (Group _ _ p) = p
+data Group = Group { groupId :: Int,
+                     groupName :: String
+                   } deriving (Show, Read, Eq)
+getGroupId (Group groupId _) = groupId
+getGroupName (Group _ groupName) = groupName
 
-type Counter = Int
 data AddressBook = AddressBook [Person] [Group] deriving (Show, Read)
 getPersons(AddressBook p _) = p
 getGroups(AddressBook _ g) = g

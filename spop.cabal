@@ -7,14 +7,16 @@ license-file: ""
 data-dir: C:\Users\GIBBON\Documents\workspace\spop\src
  
 executable spop
-    build-depends: MissingH -any, QuickCheck -any, base -any, time -any
+    build-depends: MissingH -any, QuickCheck -any, base -any,
+                   regex-posix -any, time -any
     main-is: Main.hs
     buildable: True
     hs-source-dirs: src
-    other-modules: Ui Dao Types
+    other-modules: Utils Ui Dao Main Types Utils Ui Types Dao
  
 test-suite test-spop
-    build-depends: MissingH -any, QuickCheck -any, base -any, time -any
+    build-depends: MissingH -any, QuickCheck -any, base -any,
+                   regex-posix -any, time -any
     type: exitcode-stdio-1.0
     main-is: Main.hs
     buildable: True
