@@ -656,7 +656,7 @@ searchByBirthday (AddressBook persons groups) = do
     let maybeBirthday = getDateWithValidation (  fromJust maybeBirthdayString )
     if isNothing maybeBirthday
         then do
-            showError "Podano niewlasciwa date"
+            showError "Podano niewłaściwą datę"
             showMessageBox operationFailedStr
             return (AddressBook persons  groups)
         else do
