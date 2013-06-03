@@ -39,7 +39,7 @@ mainLoop addressBook = do
 showMainMenu = do
          showMenuBox [("Zarządzanie kontaktami", showSubmenuContactsLoop),
             ("Zarządzanie grupami", showSubmenuGroupsLoop),
-            ("Wyszukiwanie kontaktów",todo),
+            ("Wyszukiwanie kontaktów",showSearchSubmenuLoop),
             ("Wyświetlenie osób obchodzących dzisiaj urodziny",showPersonsBirthdayAction),
             ("Pokaż wszystkie dane",  showAddressBookAction),
             ("Zapis danych do pliku",  saveData),
@@ -47,6 +47,25 @@ showMainMenu = do
             ("Wyczyszczenie danych", createEmptyAddressBook),
             ("Zakończ", exit)]
 
+--------------------------------------------------------------------------------
+
+--- Wyszukiwanie kontaktow
+showSearchSubmenuLoop addressBook = do
+      printNewLine
+      addressBook <- showSearchSubmenu addressBook
+      showSearchSubmenuLoop addressBook
+
+--Wyświetla podmenu zarzadzania grupami
+showSearchSubmenu addressBook = do
+      function <- showMenuBox[("Szukaj po imieniu", searchByFirstName),
+            ("Szukaj po nazwisku", searchByLastName),
+            ("Szukaj po nazwie firmy", searchByCompanyName),
+            ("Szukaj po numerze telefonu", searchByPhoneNumber),
+            ("Szukaj po adresie e-mail", searchByEmail),
+            ("Szukaj po dacie urodzenia", searchByBirthday),
+            ("Powrót do menu głównego", mainLoop)]
+      addressBook <- function addressBook
+      return addressBook
 
 --------------------------------------------------------------------------------
 

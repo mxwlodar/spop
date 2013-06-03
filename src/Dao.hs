@@ -136,12 +136,12 @@ modifyPersonAction (AddressBook persons  groups)  = do
                     showMessageBox operationFailedStr
                     return (AddressBook persons groups)
                 else do --tutaj modyfikacja
-                  maybeFirstName <- getObjectName firstName "Podaj imie"
+                  maybeFirstName <- getObjectName firstName "Podaj imię"
                   maybeLastName <- getObjectName lastName "Podaj nazwisko"
                   maybeCompanyName <- getObjectName companyName "Podaj nazwe firmy"
                   maybePhone <- getObjectName phoneNumber "Podaj numer telefonu"
                   maybeMail <- getObjectName eMail "Podaj adres email"
-                  maybeBirthdayString <- getObjectName birthDay "Podaj date urodzenia (wymagany format to YYYY-MM-DD, np. 1980-04-20)"
+                  maybeBirthdayString <- getObjectName birthDay "Podaj datę urodzenia (wymagany format to YYYY-MM-DD, np. 1980-04-20)"
 
                   let maybeBirthday = getDateWithValidation (  fromJust maybeBirthdayString )
 
@@ -291,7 +291,7 @@ showGroup (Group groupId groupName) = do
 
 ---Dodanie grupy
 addGroup (AddressBook persons  groups)  = do
-  maybeGroupName <- getObjectName groupName "Podaj nazwe grupy"
+  maybeGroupName <- getObjectName groupName "Podaj nazwę grupy"
 
   if isNothing maybeGroupName
     then do
@@ -388,7 +388,7 @@ addPersonToGroup (AddressBook persons groups) = do
                                 else do
                                     if (elem groupId (getPersonGroups (fromJust maybePerson)))
                                         then do
-                                            showError "Uzytkownik juz nalezy do tej grupy"
+                                            showError "Kontakt jest już przypisany do tej grupy"
                                             showMessageBox operationFailedStr
                                             return (AddressBook persons groups)
                                         else do
@@ -439,7 +439,7 @@ deletePersonFromGroup (AddressBook persons groups) = do
                         else do
                             if (notElem groupId (getPersonGroups (fromJust maybePerson)))
                                 then do
-                                    showError "Uzytkownik nie nalezy do tej grupy"
+                                    showError "Kontakt nie jest przypisany do tej grupy"
                                     showMessageBox operationFailedStr
                                     return (AddressBook persons groups)
                                 else do
@@ -479,7 +479,7 @@ modifyGroupAction (AddressBook persons groups) = do
                     showMessageBox operationFailedStr
                     return (AddressBook persons groups)
                 else do
-                  maybeGroupName <- getObjectName groupName "Podaj nowa nazwe grupy"
+                  maybeGroupName <- getObjectName groupName "Podaj nową nazwę grupy"
                   if isNothing maybeGroupName
                     then do
                        showMessageBox operationFailedStr
@@ -529,7 +529,7 @@ joinGroups (AddressBook persons groups) = do
                                     showMessageBox operationFailedStr
                                     return (AddressBook persons groups)
                                 else do
-                                    maybeGroupName <- getObjectName groupName "Podaj nowa nazwe grupy"
+                                    maybeGroupName <- getObjectName groupName "Podaj nazwę nowej grupy"
                                     if isNothing maybeGroupName
                                         then do
                                            showMessageBox operationFailedStr
@@ -568,7 +568,7 @@ doJoinGroups groupId1 groupId2 newGroupId (p:ps) = do
 --wyswietla kontakty w danej grupie
 showGroupAction (AddressBook persons groups) = do
     showGroupsAction (AddressBook persons groups)
-    maybeGroupName <- getObjectName groupName "Podaj nazwe grupy"
+    maybeGroupName <- getObjectName groupName "Podaj nazwę grupy"
     if isNothing maybeGroupName
         then do
            showMessageBox operationFailedStr
@@ -593,6 +593,77 @@ doShowGroup groupId (p:ps) = do
             p : doShowGroup groupId ps
         else do
             doShowGroup groupId ps
+
+--Wyszukiwanie kontaktow
+----------------------------------------------------------------------------------------------------
+searchByFirstName (AddressBook persons groups) = do
+    maybeFirstName <- getObjectName groupName "Podaj imię kontaktu"
+    if isNothing maybeFirstName
+        then do
+            showMessageBox operationFailedStr
+            return (AddressBook persons  groups)
+        else do
+            let searchPersons = filter (\p -> (getPersonFirstName p) == (fromJust maybeFirstName)) persons
+            showContacts searchPersons
+            return (AddressBook persons  groups)
+
+searchByLastName (AddressBook persons groups) = do
+    maybeLastName <- getObjectName groupName "Podaj nazwisko kontaktu"
+    if isNothing maybeLastName
+        then do
+            showMessageBox operationFailedStr
+            return (AddressBook persons  groups)
+        else do
+            let searchPersons = filter (\p -> (getPersonLastName p) == (fromJust maybeLastName)) persons
+            showContacts searchPersons
+            return (AddressBook persons  groups)
+
+searchByCompanyName (AddressBook persons groups) = do
+    maybeCompanyName <- getObjectName groupName "Podaj nazwę firmy"
+    if isNothing maybeCompanyName
+        then do
+            showMessageBox operationFailedStr
+            return (AddressBook persons  groups)
+        else do
+            let searchPersons = filter (\p -> (getPersonCompanyName p) == (fromJust maybeCompanyName)) persons
+            showContacts searchPersons
+            return (AddressBook persons  groups)
+
+searchByPhoneNumber (AddressBook persons groups) = do
+    maybePhoneNumber <- getObjectName groupName "Podaj numer telefonu"
+    if isNothing maybePhoneNumber
+        then do
+            showMessageBox operationFailedStr
+            return (AddressBook persons  groups)
+        else do
+            let searchPersons = filter (\p -> (getPersonPhoneNumber p) == (fromJust maybePhoneNumber)) persons
+            showContacts searchPersons
+            return (AddressBook persons  groups)
+
+searchByEmail (AddressBook persons groups) = do
+    maybeEmail <- getObjectName groupName "Podaj adres e-mail"
+    if isNothing maybeEmail
+        then do
+            showMessageBox operationFailedStr
+            return (AddressBook persons  groups)
+        else do
+            let searchPersons = filter (\p -> (getPersonEmail p) == (fromJust maybeEmail)) persons
+            showContacts searchPersons
+            return (AddressBook persons  groups)
+
+searchByBirthday (AddressBook persons groups) = do
+    maybeBirthdayString <- getObjectName birthDay "Podaj datę urodzenia (wymagany format to YYYY-MM-DD, np. 1980-04-20)"
+    let maybeBirthday = getDateWithValidation (  fromJust maybeBirthdayString )
+    if isNothing maybeBirthday
+        then do
+            showError "Podano niewlasciwa date"
+            showMessageBox operationFailedStr
+            return (AddressBook persons  groups)
+        else do
+            let searchPersons = filter (\p -> (getPersonBirthday p) == (fromJust maybeBirthday)) persons
+            showContacts searchPersons
+            return (AddressBook persons  groups)
+----------------------------------------------------------------------------------------------------
 
 -- wyswietlenie cala ksiazke adresowa
 showAddressBookAction (AddressBook persons groups) = do
