@@ -449,7 +449,42 @@ deletePersonFromGroup (AddressBook persons groups) = do
                                 let modifiedPersons = replaceNth index modifiedPerson persons
                                 showMessageBox operationSuccessStr
                                 return (AddressBook modifiedPersons  groups)
-                               
+
+--zmiana nazwy grupy
+modifyGroupAction (AddressBook persons groups) = do                        
+    showGroupsAction (AddressBook persons groups)
+    objectName <- showInputBox "Podaj id grupy"
+    let groupId = parseInt ( fromJust (Just objectName) )
+
+    if (groupId == 0)
+        then do
+            showError "Podano nieprawidłowy identyfikator"
+            showMessageBox operationFailedStr
+            return (AddressBook persons groups)
+        else do
+            let maybeGroup = getGroupById groupId groups
+
+            if ( isNothing maybeGroup )
+                then do
+                    showError "Nie znaleziono grupy o wskazanym identyfikatorze"
+                    showMessageBox operationFailedStr
+                    return (AddressBook persons groups)
+                else do
+                  maybeGroupName <- getObjectName groupName "Podaj nowa nazwe grupy"
+                  if isNothing maybeGroupName
+                    then do
+                       showMessageBox operationFailedStr
+                       return (AddressBook persons  groups)
+                    else do
+                    let group = fromJust maybeGroup
+                    let index = fromJust( elemIndex group groups)
+                    let modifiedGroup = (Group (getGroupId group)
+                                        (fromJust maybeGroupName)
+                                        )
+                    let modifiedGroups = replaceNth index modifiedGroup groups
+                    showMessageBox operationSuccessStr
+                    return (AddressBook persons modifiedGroups)
+
 
 -- wyswietlenie cala ksiazke adresowa
 showAddressBookAction (AddressBook persons groups) = do

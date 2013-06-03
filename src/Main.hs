@@ -80,7 +80,7 @@ showSubmenuGroupsLoop addressBook = do
 --Wyświetla podmenu zarzadzania grupami
 submenuGroups addressBook = do
       function <- showMenuBox[("Dodaj nową grupę", addGroup),
-            ("Modyfikuj grupę", todo),
+            ("Modyfikuj grupę", modifyGroupAction),
             ("Usuń grupę", deleteGroupAction),
             ("Wyświetl wszystkie grupy", showGroupsAction),
             ("Scal dwie grupy w nową grupę", todo),
