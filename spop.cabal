@@ -4,17 +4,20 @@ cabal-version: >=1.2
 build-type: Simple
 license: AllRightsReserved
 license-file: ""
+description:  
 data-dir: C:\Users\GIBBON\Documents\workspace\spop\src
  
 executable spop
-    build-depends: MissingH -any, QuickCheck -any, base -any, time -any
+    build-depends: MissingH -any, QuickCheck -any, base -any,
+                   regex-posix -any, time -any
     main-is: Main.hs
     buildable: True
     hs-source-dirs: src
-    other-modules: Ui Dao Types
+    other-modules: Types Dao Ui
  
 test-suite test-spop
-    build-depends: MissingH -any, QuickCheck -any, base -any, time -any
+    build-depends: MissingH -any, QuickCheck -any, base -any,
+                   regex-posix -any, time -any
     type: exitcode-stdio-1.0
     main-is: Main.hs
     buildable: True

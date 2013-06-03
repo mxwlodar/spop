@@ -26,10 +26,6 @@ import Data.Typeable
 
 
 
--- tutaj beda funkcje dostepu i manipulacji na danych
-
-
-
 -- stworzenie nowej pustej ksiazki adresowej
 createEmptyAddressBook _ = return emptyAddressBook
 
@@ -108,6 +104,7 @@ doAddPerson  id firstName lastName companyName phone email birthDay persons = do
         [(Person id firstName lastName companyName phone email birthDay [])] ++ persons
 
 
+--modyfikacja kontaktu
 modifyPersonAction (AddressBook persons  groups)  = do
     showContactsReverse (AddressBook persons groups)
     objectName <- showInputBox "Podaj id kontkatu"
