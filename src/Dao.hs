@@ -26,6 +26,10 @@ import Data.Typeable
 
 
 
+-- tutaj beda funkcje dostepu i manipulacji na danych
+
+
+
 -- stworzenie nowej pustej ksiazki adresowej
 createEmptyAddressBook _ = return emptyAddressBook
 
@@ -49,7 +53,7 @@ getNextGroupId:: [Group] -> Int
 getNextGroupId [] = 1;
 getNextGroupId (g:gs) = (max (getGroupId g) (getNextGroupId gs))+1 ;
 
--- zwraca osobe na podstawie identyfikatora
+-- zwraca grupe na podstawie identyfikatora
 getGroupById:: Int -> [Group] -> Maybe Group
 getGroupById id [] = Nothing
 getGroupById id (g:gs) = if (id == getGroupId g )
@@ -104,9 +108,8 @@ doAddPerson  id firstName lastName companyName phone email birthDay persons = do
         [(Person id firstName lastName companyName phone email birthDay [])] ++ persons
 
 
---modyfikacja kontaktu
 modifyPersonAction (AddressBook persons  groups)  = do
-    showContactsReverse (AddressBook persons groups)
+    showContactsAction (AddressBook persons groups)
     objectName <- showInputBox "Podaj id kontkatu"
     let id = parseInt ( fromJust (Just objectName) )
 
@@ -171,7 +174,7 @@ modifyPersonAction (AddressBook persons  groups)  = do
 
 --usuwa kontakt
 deletePersonAction (AddressBook persons groups) = do
-    showContactsReverse (AddressBook persons groups)
+    showContactsAction (AddressBook persons groups)
     objectName <- showInputBox "Podaj id kontkatu"
     let id = parseInt ( fromJust (Just objectName) )
 
@@ -211,16 +214,16 @@ hasBirthDayAtDate p date = (yp == y) && (mp == m) && (dp == d)
 
 
 -- wyswietlenie listy kontaktow
-showContactsReverse (AddressBook persons groups) = do
-            showMessageBox "Lista kontaktow:"
-            showContacts (reverse persons)
+showContactsAction (AddressBook persons groups) = do
+            showContacts persons
             return (AddressBook persons groups)
 
 -- wywietla kontakty
-showContacts [] = putStr "";
+showContacts [] = showMessageBox "Lista kontaktow:"
 showContacts (p:ps) = do
-            showContact(p)
             showContacts (ps)
+            showContact(p)
+            
 
 -- wyswietla kontakt
 showContact (Person id firstName lastName companyName phone email birthDay []) = do
@@ -258,3 +261,72 @@ loadData addressBook = doLoadData addressBook
                      readmaybeAddressBook :: String -> Maybe AddressBook
                      readmaybeAddressBook = readMaybe
 
+--GRUPY
+----------------------------------------------------------------------------------------------------
+-- wyswietlenie listy grup
+showGroupsAction (AddressBook persons groups) = do
+            showGroups (groups)
+            return (AddressBook persons groups)
+
+-- wywietla grupy
+showGroups [] = showMessageBox "Lista grup:"
+showGroups (g:gs) = do
+            showGroups(gs)
+            showGroup(g)
+
+
+-- wyswietla grupe
+showGroup (Group groupId groupName) = do
+            putStrLn ("id: " ++ (show groupId))
+            putStrLn ("Nazwa: " ++groupName ++ "\n")
+
+---Dodanie grupy
+addGroup (AddressBook persons  groups)  = do
+  maybeGroupName <- getObjectName groupName "Podaj nazwe grupy"
+
+  if isNothing maybeGroupName
+    then do
+       showMessageBox operationFailedStr
+       return (AddressBook persons  groups)
+    else do
+
+    let newGroups = doAddGroup (getNextGroupId groups)
+                               ( fromJust maybeGroupName)                                groups
+
+    showMessageBox operationSuccessStr
+    showGroupsAction (AddressBook persons newGroups)
+    return (AddressBook persons  newGroups)
+
+doAddGroup groupId groupName groups = do
+        [(Group groupId groupName)] ++ groups
+
+--usuwa grupe
+deleteGroupAction (AddressBook persons groups) = do
+    showGroupsAction (AddressBook persons groups)
+    return (AddressBook persons groups)
+    objectName <- showInputBox "Podaj id grupy"
+    let groupId = parseInt ( fromJust (Just objectName) )
+
+    if (groupId == 0)
+        then do
+            showError "Podano nieprawidłowy identyfikator"
+            showMessageBox operationFailedStr
+            return (AddressBook persons groups)
+        else do
+            let maybeGroup = getGroupById groupId groups
+
+            if ( isNothing maybeGroup )
+                then do
+                    showError "Nie znaleziono grupy o wskazanym identyfikatorze"
+                    showMessageBox operationFailedStr
+                    return (AddressBook persons groups)
+                else do
+                    let restGroups = removeItem (fromJust maybeGroup) groups
+                    showMessageBox operationSuccessStr
+                    return (AddressBook persons restGroups)
+
+-- wyswietlenie cala ksiazke adresowa
+showAddressBookAction (AddressBook persons groups) = do
+            showContacts (persons)
+            showGroups (groups)
+            return (AddressBook persons groups)

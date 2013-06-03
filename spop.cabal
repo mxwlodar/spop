@@ -13,7 +13,7 @@ executable spop
     main-is: Main.hs
     buildable: True
     hs-source-dirs: src
-    other-modules: Types Dao Ui
+    other-modules: Utils Ui Dao Main Types Utils Ui Types Dao
  
 test-suite test-spop
     build-depends: MissingH -any, QuickCheck -any, base -any,
