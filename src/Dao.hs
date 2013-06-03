@@ -485,6 +485,76 @@ modifyGroupAction (AddressBook persons groups) = do
                     showMessageBox operationSuccessStr
                     return (AddressBook persons modifiedGroups)
 
+--scalanie grup
+joinGroups (AddressBook persons groups) = do                        
+    showGroupsAction (AddressBook persons groups)
+    objectName1 <- showInputBox "Podaj id pierwszej grupy"
+    let groupId1 = parseInt ( fromJust (Just objectName1) )
+
+    if (groupId1 == 0)
+        then do
+            showError "Podano nieprawidłowy identyfikator"
+            showMessageBox operationFailedStr
+            return (AddressBook persons groups)
+        else do
+            let maybeGroup1 = getGroupById groupId1 groups
+            if ( isNothing maybeGroup1 )
+                then do
+                    showError "Nie znaleziono grupy o wskazanym identyfikatorze"
+                    showMessageBox operationFailedStr
+                    return (AddressBook persons groups)
+                else do
+                    objectName2 <- showInputBox "Podaj id drugiej grupy"
+                    let groupId2 = parseInt ( fromJust (Just objectName2) )
+
+                    if (groupId2 == 0)
+                        then do
+                            showError "Podano nieprawidłowy identyfikator"
+                            showMessageBox operationFailedStr
+                            return (AddressBook persons groups)
+                        else do
+                            let maybeGroup2 = getGroupById groupId2 groups
+                            if ( isNothing maybeGroup2 )
+                                then do
+                                    showError "Nie znaleziono grupy o wskazanym identyfikatorze"
+                                    showMessageBox operationFailedStr
+                                    return (AddressBook persons groups)
+                                else do
+                                    maybeGroupName <- getObjectName groupName "Podaj nowa nazwe grupy"
+                                    if isNothing maybeGroupName
+                                        then do
+                                           showMessageBox operationFailedStr
+                                           return (AddressBook persons  groups)
+                                        else do
+                                            let restGroups = removeItem (fromJust maybeGroup1) groups
+                                            let restGroups1 = removeItem (fromJust maybeGroup2) restGroups
+                                            let newGroups = doAddGroup (getNextGroupId groups)
+                                                                       (fromJust maybeGroupName)                                                                       restGroups1
+                                            let newPersons = doJoinGroups groupId1
+                                                                          groupId2
+                                                                          (getNextGroupId groups)
+                                                                          persons
+                                            showMessageBox operationSuccessStr
+                                            return (AddressBook newPersons newGroups)
+doJoinGroups _ _ _ [] = []
+doJoinGroups groupId1 groupId2 newGroupId (p:ps) = do
+    if elem groupId1 (getPersonGroups p) ||
+       elem groupId2 (getPersonGroups p)
+        then do
+            let newGroupList = delete groupId1 (getPersonGroups p)
+            let newGroupList2 = delete groupId2 newGroupList
+            let modifiedPerson = (Person (getPersonId p)
+                            ( getPersonFirstName p)
+                            ( getPersonLastName p)
+                            ( getPersonCompanyName p)
+                            ( getPersonPhoneNumber p)
+                            ( getPersonEmail p)
+                            ( getPersonBirthday p)
+                            ( newGroupId : newGroupList2)
+                            )
+            modifiedPerson : (doJoinGroups groupId1 groupId2 newGroupId ps)
+        else do
+            p : (doJoinGroups groupId1 groupId2 newGroupId ps)
 
 -- wyswietlenie cala ksiazke adresowa
 showAddressBookAction (AddressBook persons groups) = do

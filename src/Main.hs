@@ -83,7 +83,7 @@ submenuGroups addressBook = do
             ("Modyfikuj grupę", modifyGroupAction),
             ("Usuń grupę", deleteGroupAction),
             ("Wyświetl wszystkie grupy", showGroupsAction),
-            ("Scal dwie grupy w nową grupę", todo),
+            ("Scal dwie grupy w nową grupę", joinGroups),
             ("Powrót do menu głównego", mainLoop)]
       addressBook <- function addressBook
       return addressBook
