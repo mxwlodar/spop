@@ -51,7 +51,18 @@ getDateWithValidation str = if ( not( validateMatchedDate matchedDate ( fromJust
                             matchedDate = matchDate str
                             maybeDate = parseDate (matchedDate);
 
+--dopasowuje wyrazeniem regularny adres mailowy
+matchEmail :: String  -> [String]
+matchEmail str = getAllTextMatches $ str =~ "^[_a-z0-9-]+(\\.[_a-z0-9-]+)@[a-z0-9-]+(\\.[a-z0-9-]+)(\\.[a-z]{2,4})$" :: [String]
 
+--parsuje mail na podstawie wyniku dopasowania z wyrazenia regularnego
+parseMatchedEmail :: [String] -> Maybe String
+parseMatchedEmail (mail:_) = Just mail
+parseMatchedEmail _ = Nothing
+
+--parsuje mail ze stringa
+parseEmail:: String -> Maybe String
+parseEmail mail = parseMatchedEmail (matchEmail mail)
 
 data Person = Person { id :: Int,
                        firstName :: String,
