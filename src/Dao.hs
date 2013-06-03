@@ -62,6 +62,15 @@ getGroupById id (g:gs) = if (id == getGroupId g )
                                 else
                                     getGroupById id gs
 
+-- zwraca grupe na podstawie nazwy
+getGroupByName :: String -> [Group] -> Maybe Group
+getGroupByName name [] = Nothing
+getGroupByName name (g:gs) = if (name == getGroupName g )
+                                then
+                                    Just g
+                                else
+                                    getGroupByName name gs
+
 ---Dodanie osoby
 addPerson (AddressBook persons  groups)  = do
   maybeFirstName <- getObjectName firstName "Podaj imie"
@@ -555,6 +564,35 @@ doJoinGroups groupId1 groupId2 newGroupId (p:ps) = do
             modifiedPerson : (doJoinGroups groupId1 groupId2 newGroupId ps)
         else do
             p : (doJoinGroups groupId1 groupId2 newGroupId ps)
+
+--wyswietla kontakty w danej grupie
+showGroupAction (AddressBook persons groups) = do
+    showGroupsAction (AddressBook persons groups)
+    maybeGroupName <- getObjectName groupName "Podaj nazwe grupy"
+    if isNothing maybeGroupName
+        then do
+           showMessageBox operationFailedStr
+           return (AddressBook persons  groups)
+        else do
+
+            let maybeGroup = getGroupByName (fromJust maybeGroupName) groups
+            if ( isNothing maybeGroup )
+                then do
+                    showError "Nie ma takiej grupy"
+                    showMessageBox operationFailedStr
+                    return (AddressBook persons groups)
+                else do
+                    let personsToShow = doShowGroup (getGroupId (fromJust maybeGroup)) persons
+                    showContacts personsToShow
+                    return (AddressBook persons  groups)
+
+doShowGroup _ [] = []
+doShowGroup groupId (p:ps) = do
+    if elem groupId (getPersonGroups p)
+        then do
+            p : doShowGroup groupId ps
+        else do
+            doShowGroup groupId ps
 
 -- wyswietlenie cala ksiazke adresowa
 showAddressBookAction (AddressBook persons groups) = do

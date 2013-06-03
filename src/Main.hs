@@ -82,6 +82,7 @@ submenuGroups addressBook = do
       function <- showMenuBox[("Dodaj nową grupę", addGroup),
             ("Modyfikuj grupę", modifyGroupAction),
             ("Usuń grupę", deleteGroupAction),
+            ("Wyświetl grupe", showGroupAction),
             ("Wyświetl wszystkie grupy", showGroupsAction),
             ("Scal dwie grupy w nową grupę", joinGroups),
             ("Powrót do menu głównego", mainLoop)]
