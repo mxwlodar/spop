@@ -26,8 +26,6 @@ import Data.Typeable
 
 
 
--- tutaj beda funkcje dostepu i manipulacji na danych
-
 
 
 -- stworzenie nowej pustej ksiazki adresowej
@@ -73,12 +71,12 @@ getGroupByName name (g:gs) = if (name == getGroupName g )
 
 ---Dodanie osoby
 addPerson (AddressBook persons  groups)  = do
-  maybeFirstName <- getObjectName firstName "Podaj imie"
-  maybeLastName <- getObjectName lastName "Podaj nazwisko"
-  maybeCompanyName <- getObjectName companyName "Podaj nazwe firmy"
-  maybePhone <- getObjectName phoneNumber "Podaj numer telefonu"
-  maybeEmailString <- getObjectName eMail "Podaj adres email"
-  maybeBirthdayString <- getObjectName birthDay "Podaj date urodzenia (wymagany format to YYYY-MM-DD, np. 1980-04-20)"
+  maybeFirstName <- getObjectName firstName typeFirstName
+  maybeLastName <- getObjectName lastName typeLastName
+  maybeCompanyName <- getObjectName companyName typeCompanyName
+  maybePhone <- getObjectName phoneNumber typePhone
+  maybeEmailString <- getObjectName eMail typeEmail
+  maybeBirthdayString <- getObjectName birthDay typeBirthday
 
   let maybeEmail = parseEmail (fromJust maybeEmailString)
   let maybeBirthday = getDateWithValidation (  fromJust maybeBirthdayString )
@@ -86,14 +84,14 @@ addPerson (AddressBook persons  groups)  = do
   --sprawdzanie maila
   if  ( isNothing maybeEmail )
         then do
-            showError "Podano nieprawidłowy adres e-mail"
+            showError wrongEmail
         else
             putStr ""
 
   -- walidacja daty
   if  ( isNothing maybeBirthday )
         then do
-            showError "Podano nieprawidłową datę"
+            showError wrongDate
         else
             putStr ""
 
@@ -126,12 +124,12 @@ doAddPerson  id firstName lastName companyName phone email birthDay persons = do
 
 modifyPersonAction (AddressBook persons  groups)  = do
     showContactsAction (AddressBook persons groups)
-    objectName <- showInputBox "Podaj id kontkatu"
+    objectName <- showInputBox typeContactId
     let id = parseInt ( fromJust (Just objectName) )
 
     if (id == 0)
         then do
-            showError "Podano nieprawidłowy identyfikator"
+            showError wrongIdStr
             showMessageBox operationFailedStr
             return (AddressBook persons groups)
         else do
@@ -139,16 +137,16 @@ modifyPersonAction (AddressBook persons  groups)  = do
 
             if ( isNothing maybePerson )
                 then do
-                    showError "Nie znaleziono kontaktu o wskazanym identyfikatorze"
+                    showError contactIdNotFoundStr
                     showMessageBox operationFailedStr
                     return (AddressBook persons groups)
                 else do --tutaj modyfikacja
-                  maybeFirstName <- getObjectName firstName "Podaj imię"
-                  maybeLastName <- getObjectName lastName "Podaj nazwisko"
-                  maybeCompanyName <- getObjectName companyName "Podaj nazwe firmy"
-                  maybePhone <- getObjectName phoneNumber "Podaj numer telefonu"
-                  maybeEmailString <- getObjectName eMail "Podaj adres email"
-                  maybeBirthdayString <- getObjectName birthDay "Podaj datę urodzenia (wymagany format to YYYY-MM-DD, np. 1980-04-20)"
+                  maybeFirstName <- getObjectName firstName typeFirstName
+                  maybeLastName <- getObjectName lastName typeLastName
+                  maybeCompanyName <- getObjectName companyName typeCompanyName
+                  maybePhone <- getObjectName phoneNumber typePhone
+                  maybeEmailString <- getObjectName eMail typeEmail
+                  maybeBirthdayString <- getObjectName birthDay typeBirthday
 
                   let maybeEmail = parseEmail (fromJust maybeEmailString)
                   let maybeBirthday = getDateWithValidation (  fromJust maybeBirthdayString )
@@ -156,14 +154,14 @@ modifyPersonAction (AddressBook persons  groups)  = do
                   --sprawdzanie maila
                   if  ( isNothing maybeEmail )
                         then do
-                            showError "Podano nieprawidłowy adres e-mail"
+                            showError wrongEmail
                         else
                             putStr ""
 
                   -- walidacja daty
                   if  ( isNothing maybeBirthday )
                         then do
-                            showError "Podano nieprawidłową datę"
+                            showError wrongDate
                         else
                             putStr ""
 
@@ -199,12 +197,12 @@ modifyPersonAction (AddressBook persons  groups)  = do
 --usuwa kontakt
 deletePersonAction (AddressBook persons groups) = do
     showContactsAction (AddressBook persons groups)
-    objectName <- showInputBox "Podaj id kontkatu"
+    objectName <- showInputBox typeContactId
     let id = parseInt ( fromJust (Just objectName) )
 
     if (id == 0)
         then do
-            showError "Podano nieprawidłowy identyfikator"
+            showError wrongIdStr
             showMessageBox operationFailedStr
             return (AddressBook persons groups)
         else do
@@ -212,7 +210,7 @@ deletePersonAction (AddressBook persons groups) = do
 
             if ( isNothing maybePerson )
                 then do
-                    showError "Nie znaleziono kontaktu o wskazanym identyfikatorze"
+                    showError contactIdNotFoundStr
                     showMessageBox operationFailedStr
                     return (AddressBook persons groups)
                 else do
@@ -226,12 +224,12 @@ showPersonsBirthdayAction (AddressBook persons groups) = do
     showMessageBox "Obchodzący dzisiaj urodziny:"
     (y,m,d) <- getCurrentDate
     let birthDayPersons = filter (\p -> hasBirthDayAtDate p (fromGregorian y m d)) persons
-    showContacts (reverse birthDayPersons)
+    showContacts birthDayPersons groups
     return (AddressBook persons groups)
 
 -- sprawdza czy osoba ma dzisiaj urodziny
 hasBirthDayAtDate :: Person -> Day -> Bool
-hasBirthDayAtDate p date = (yp == y) && (mp == m) && (dp == d)
+hasBirthDayAtDate p date = (mp == m) && (dp == d)
                 where
                     (y, m, d) = toGregorian date
                     (yp, mp, dp) = toGregorian (getPersonBirthday p)
@@ -239,51 +237,35 @@ hasBirthDayAtDate p date = (yp == y) && (mp == m) && (dp == d)
 
 -- wyswietlenie listy kontaktow
 showContactsAction (AddressBook persons groups) = do
-            showContacts persons
+            showContacts persons groups
             return (AddressBook persons groups)
 
 -- wywietla kontakty
-showContacts [] = showMessageBox "Lista kontaktow:"
-showContacts (p:ps) = do
-            showContacts (ps)
-            showContact(p)
+showContacts [] _ = showMessageBox "Lista kontaktów:"
+showContacts (p:ps) allGroups = do
+            showContacts ps allGroups
+            showContact p allGroups
 
 
 -- wyswietla kontakt
-showContact (Person id firstName lastName companyName phone email birthDay groups) = do
+showContact (Person id firstName lastName companyName phone email birthDay groups) allGroups = do
             putStrLn ("id: " ++ (show id))
             putStrLn ("Imię i nazwisko: " ++firstName ++ " " ++ lastName)
             putStrLn ("Firma: " ++ companyName)
             putStrLn ("Telefon: " ++ phone)
             putStrLn ("Email: " ++ email)
             putStrLn ("Data urodzenia: " ++ (show birthDay) )
-            putStrLn ("Grupy: " ++ (show groups) ++ "\n\n" )
+            putStr ("Grupy: " )
+            showGroupsWithDescription groups allGroups
+            putStrLn ("\n\n" )
 
--- Zapis danych do pliku
-saveData addressBook = do
-  filePath <- showFileInputBox
-  saveToFile addressBook filePath
-  showMessageBox operationSuccessStr
-  return addressBook
+showGroupsWithDescription [] _ = putStr ""
+showGroupsWithDescription (id:ids) allGroups = do
+            let g = fromJust( getGroupById id allGroups)
+            showGroupsWithDescription ids allGroups
+            putStr ( (show (getGroupId g)) ++  "-" ++ (getGroupName g) ++ "     " )
 
 
--- Wczytanie danych z pliku
-loadData addressBook = doLoadData addressBook
-  where
-    doLoadData addressBook = do
-      filePath <- showFileInputBox
-      maybeAddressBook <- loadFromFile filePath readmaybeAddressBook
-      if isNothing maybeAddressBook
-          then do
-            showMessageBox invalidFormatErrorStr
-            return addressBook
-          else do
-            showMessageBox operationSuccessStr
-            let newAddressBook = fromJust maybeAddressBook
-            return newAddressBook
-                 where
-                     readmaybeAddressBook :: String -> Maybe AddressBook
-                     readmaybeAddressBook = readMaybe
 
 --GRUPY
 ----------------------------------------------------------------------------------------------------
@@ -306,7 +288,7 @@ showGroup (Group groupId groupName) = do
 
 ---Dodanie grupy
 addGroup (AddressBook persons  groups)  = do
-  maybeGroupName <- getObjectName groupName "Podaj nazwę grupy"
+  maybeGroupName <- getObjectName groupName typeGroupName
 
   if isNothing maybeGroupName
     then do
@@ -328,12 +310,12 @@ doAddGroup groupId groupName groups = do
 --usuwa grupe
 deleteGroupAction (AddressBook persons groups) = do
     showGroupsAction (AddressBook persons groups)
-    objectName <- showInputBox "Podaj id grupy"
+    objectName <- showInputBox typeGroupId
     let groupId = parseInt ( fromJust (Just objectName) )
 
     if (groupId == 0)
         then do
-            showError "Podano nieprawidłowy identyfikator"
+            showError wrongIdStr
             showMessageBox operationFailedStr
             return (AddressBook persons groups)
         else do
@@ -341,7 +323,7 @@ deleteGroupAction (AddressBook persons groups) = do
 
             if ( isNothing maybeGroup )
                 then do
-                    showError "Nie znaleziono grupy o wskazanym identyfikatorze"
+                    showError groupIdNotFound
                     showMessageBox operationFailedStr
                     return (AddressBook persons groups)
                 else do
@@ -368,12 +350,12 @@ deleteGroup groupId (p:ps) = do
 --dodaje osobe do grupy
 addPersonToGroup (AddressBook persons groups) = do
     showGroupsAction (AddressBook persons groups)
-    objectName <- showInputBox "Podaj id osoby"
+    objectName <- showInputBox typeContactId
     let id = parseInt ( fromJust (Just objectName) )
 
     if (id == 0)
         then do
-            showError "Podano nieprawidłowy identyfikator osoby"
+            showError wrongPersonIdStr
             showMessageBox operationFailedStr
             return (AddressBook persons groups)
         else do
@@ -381,16 +363,16 @@ addPersonToGroup (AddressBook persons groups) = do
 
             if ( isNothing maybePerson )
                 then do
-                    showError "Nie znaleziono osoby o wskazanym identyfikatorze"
+                    showError contactIdNotFoundStr
                     showMessageBox operationFailedStr
                     return (AddressBook persons groups)
                 else do
-                    objectName2 <- showInputBox "Podaj id grupy"
+                    objectName2 <- showInputBox typeGroupId
                     let groupId = parseInt ( fromJust (Just objectName2) )
 
                     if (groupId == 0)
                         then do
-                            showError "Podano nieprawidłowy identyfikator grupy"
+                            showError wrongGroupIdStr
                             showMessageBox operationFailedStr
                             return (AddressBook persons groups)
                         else do
@@ -398,7 +380,7 @@ addPersonToGroup (AddressBook persons groups) = do
 
                             if ( isNothing maybeGroup )
                                 then do
-                                    showError "Nie znaleziono grupy o wskazanym identyfikatorze"
+                                    showError groupIdNotFound
                                     showMessageBox operationFailedStr
                                     return (AddressBook persons groups)
                                 else do
@@ -426,12 +408,12 @@ addPersonToGroup (AddressBook persons groups) = do
 
 --usuwa osobe z grupy
 deletePersonFromGroup (AddressBook persons groups) = do
-    objectName <- showInputBox "Podaj id osoby"
+    objectName <- showInputBox typeContactId
     let id = parseInt ( fromJust (Just objectName) )
 
     if (id == 0)
         then do
-            showError "Podano nieprawidłowy identyfikator osoby"
+            showError wrongPersonIdStr
             showMessageBox operationFailedStr
             return (AddressBook persons groups)
         else do
@@ -439,17 +421,17 @@ deletePersonFromGroup (AddressBook persons groups) = do
 
             if ( isNothing maybePerson )
                 then do
-                    showError "Nie znaleziono osoby o wskazanym identyfikatorze"
+                    showError contactIdNotFoundStr
                     showMessageBox operationFailedStr
                     return (AddressBook persons groups)
                 else do
-                    showContact (fromJust maybePerson)
-                    objectName2 <- showInputBox "Podaj id grupy"
+                    showContact (fromJust maybePerson) groups
+                    objectName2 <- showInputBox typeGroupId
                     let groupId = parseInt ( fromJust (Just objectName2) )
 
                     if (groupId == 0)
                         then do
-                            showError "Podano nieprawidłowy identyfikator grupy"
+                            showError wrongGroupIdStr
                             showMessageBox operationFailedStr
                             return (AddressBook persons groups)
                         else do
@@ -478,12 +460,12 @@ deletePersonFromGroup (AddressBook persons groups) = do
 --zmiana nazwy grupy
 modifyGroupAction (AddressBook persons groups) = do
     showGroupsAction (AddressBook persons groups)
-    objectName <- showInputBox "Podaj id grupy"
+    objectName <- showInputBox typeGroupId
     let groupId = parseInt ( fromJust (Just objectName) )
 
     if (groupId == 0)
         then do
-            showError "Podano nieprawidłowy identyfikator"
+            showError wrongIdStr
             showMessageBox operationFailedStr
             return (AddressBook persons groups)
         else do
@@ -491,7 +473,7 @@ modifyGroupAction (AddressBook persons groups) = do
 
             if ( isNothing maybeGroup )
                 then do
-                    showError "Nie znaleziono grupy o wskazanym identyfikatorze"
+                    showError groupIdNotFound
                     showMessageBox operationFailedStr
                     return (AddressBook persons groups)
                 else do
@@ -518,14 +500,14 @@ joinGroups (AddressBook persons groups) = do
 
     if (groupId1 == 0)
         then do
-            showError "Podano nieprawidłowy identyfikator"
+            showError wrongIdStr
             showMessageBox operationFailedStr
             return (AddressBook persons groups)
         else do
             let maybeGroup1 = getGroupById groupId1 groups
             if ( isNothing maybeGroup1 )
                 then do
-                    showError "Nie znaleziono grupy o wskazanym identyfikatorze"
+                    showError groupIdNotFound
                     showMessageBox operationFailedStr
                     return (AddressBook persons groups)
                 else do
@@ -534,14 +516,14 @@ joinGroups (AddressBook persons groups) = do
 
                     if (groupId2 == 0)
                         then do
-                            showError "Podano nieprawidłowy identyfikator"
+                            showError wrongIdStr
                             showMessageBox operationFailedStr
                             return (AddressBook persons groups)
                         else do
                             let maybeGroup2 = getGroupById groupId2 groups
                             if ( isNothing maybeGroup2 )
                                 then do
-                                    showError "Nie znaleziono grupy o wskazanym identyfikatorze"
+                                    showError groupIdNotFound
                                     showMessageBox operationFailedStr
                                     return (AddressBook persons groups)
                                 else do
@@ -585,7 +567,7 @@ doJoinGroups groupId1 groupId2 newGroupId (p:ps) = do
 --wyswietla kontakty w danej grupie
 showGroupAction (AddressBook persons groups) = do
     showGroupsAction (AddressBook persons groups)
-    maybeGroupName <- getObjectName groupName "Podaj nazwę grupy"
+    maybeGroupName <- getObjectName groupName typeGroupName
     if isNothing maybeGroupName
         then do
            showMessageBox operationFailedStr
@@ -600,8 +582,9 @@ showGroupAction (AddressBook persons groups) = do
                     return (AddressBook persons groups)
                 else do
                     let personsToShow = doShowGroup (getGroupId (fromJust maybeGroup)) persons
-                    showContacts personsToShow
+                    showContacts personsToShow groups
                     return (AddressBook persons  groups)
+
 
 doShowGroup _ [] = []
 doShowGroup groupId (p:ps) = do
@@ -614,76 +597,107 @@ doShowGroup groupId (p:ps) = do
 --Wyszukiwanie kontaktow
 ----------------------------------------------------------------------------------------------------
 searchByFirstName (AddressBook persons groups) = do
-    maybeFirstName <- getObjectName groupName "Podaj imię kontaktu"
+    maybeFirstName <- getObjectName groupName typeFirstName
     if isNothing maybeFirstName
         then do
             showMessageBox operationFailedStr
             return (AddressBook persons  groups)
         else do
             let searchPersons = filter (\p -> (getPersonFirstName p) == (fromJust maybeFirstName)) persons
-            showContacts searchPersons
+            showContacts searchPersons groups
             return (AddressBook persons  groups)
 
 searchByLastName (AddressBook persons groups) = do
-    maybeLastName <- getObjectName groupName "Podaj nazwisko kontaktu"
+    maybeLastName <- getObjectName groupName typeLastName
     if isNothing maybeLastName
         then do
             showMessageBox operationFailedStr
             return (AddressBook persons  groups)
         else do
             let searchPersons = filter (\p -> (getPersonLastName p) == (fromJust maybeLastName)) persons
-            showContacts searchPersons
+            showContacts searchPersons groups
             return (AddressBook persons  groups)
 
 searchByCompanyName (AddressBook persons groups) = do
-    maybeCompanyName <- getObjectName groupName "Podaj nazwę firmy"
+    maybeCompanyName <- getObjectName groupName typeCompanyName
     if isNothing maybeCompanyName
         then do
             showMessageBox operationFailedStr
             return (AddressBook persons  groups)
         else do
             let searchPersons = filter (\p -> (getPersonCompanyName p) == (fromJust maybeCompanyName)) persons
-            showContacts searchPersons
+            showContacts searchPersons groups
             return (AddressBook persons  groups)
 
 searchByPhoneNumber (AddressBook persons groups) = do
-    maybePhoneNumber <- getObjectName groupName "Podaj numer telefonu"
+    maybePhoneNumber <- getObjectName groupName typePhone
     if isNothing maybePhoneNumber
         then do
             showMessageBox operationFailedStr
             return (AddressBook persons  groups)
         else do
             let searchPersons = filter (\p -> (getPersonPhoneNumber p) == (fromJust maybePhoneNumber)) persons
-            showContacts searchPersons
+            showContacts searchPersons groups
             return (AddressBook persons  groups)
 
 searchByEmail (AddressBook persons groups) = do
-    maybeEmail <- getObjectName groupName "Podaj adres e-mail"
+    maybeEmail <- getObjectName groupName typeEmail
     if isNothing maybeEmail
         then do
             showMessageBox operationFailedStr
             return (AddressBook persons  groups)
         else do
             let searchPersons = filter (\p -> (getPersonEmail p) == (fromJust maybeEmail)) persons
-            showContacts searchPersons
+            showContacts searchPersons groups
             return (AddressBook persons  groups)
 
 searchByBirthday (AddressBook persons groups) = do
-    maybeBirthdayString <- getObjectName birthDay "Podaj datę urodzenia (wymagany format to YYYY-MM-DD, np. 1980-04-20)"
+    maybeBirthdayString <- getObjectName birthDay typeBirthday
     let maybeBirthday = getDateWithValidation (  fromJust maybeBirthdayString )
     if isNothing maybeBirthday
         then do
-            showError "Podano niewłaściwą datę"
+            showError wrongDate
             showMessageBox operationFailedStr
             return (AddressBook persons  groups)
         else do
             let searchPersons = filter (\p -> (getPersonBirthday p) == (fromJust maybeBirthday)) persons
-            showContacts searchPersons
+            showContacts searchPersons groups
             return (AddressBook persons  groups)
 ----------------------------------------------------------------------------------------------------
 
--- wyswietlenie cala ksiazke adresowa
+-- wyswietlenie calej ksiazki adresowej
 showAddressBookAction (AddressBook persons groups) = do
-            showContacts (persons)
+            showContacts (persons) groups
             showGroups (groups)
             return (AddressBook persons groups)
+
+
+
+-- Zapis i danych z/do pliku
+----------------------------------------------------------------------------------------------------
+
+-- Zapis danych do pliku
+saveData addressBook = do
+  filePath <- showFileInputBox
+  saveToFile addressBook filePath
+  showMessageBox operationSuccessStr
+  return addressBook
+
+
+-- Wczytanie danych z pliku
+loadData addressBook = doLoadData addressBook
+  where
+    doLoadData addressBook = do
+      filePath <- showFileInputBox
+      maybeAddressBook <- loadFromFile filePath readmaybeAddressBook
+      if isNothing maybeAddressBook
+          then do
+            showMessageBox invalidFormatErrorStr
+            return addressBook
+          else do
+            showMessageBox operationSuccessStr
+            let newAddressBook = fromJust maybeAddressBook
+            return newAddressBook
+                 where
+                     readmaybeAddressBook :: String -> Maybe AddressBook
+                     readmaybeAddressBook = readMaybe
