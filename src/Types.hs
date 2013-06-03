@@ -64,6 +64,11 @@ data Person = Person { id :: Int,
                      } deriving (Show, Read, Eq)
 
 getPersonId(Person id _ _ _ _ _ _ _) = id
+getPersonFirstName (Person _ firstName _ _ _ _ _ _) = firstName
+getPersonLastName (Person _ _ lastName _ _ _ _ _) = lastName
+getPersonCompanyName (Person _ _ _ companyName _ _ _ _) = companyName
+getPersonPhoneNumber (Person _ _ _ _ phoneNumber _ _ _) = phoneNumber
+getPersonEmail (Person _ _ _ _ _ eMail _ _) = eMail
 getPersonBirthday(Person _ _ _ _ _ _ birthDay _) = birthDay
 getPersonGroups (Person _ _ _ _ _ _ _ groups) = groups
 

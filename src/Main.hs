@@ -62,8 +62,8 @@ submenuContacts addressBook = do
             ("Modyfikuj kontakt", modifyPersonAction),
             ("Usuń kontakt", deletePersonAction),
             ("Wyświetl wszystkie kontakty",  showContactsAction),
-            ("Przypisz kontakt do grupy", todo),
-            ("Usuń z grupy", todo),
+            ("Przypisz kontakt do grupy", addPersonToGroup),
+            ("Usuń z grupy", deletePersonFromGroup),
             ("Powrót do menu głównego", mainLoop)]
       addressBook <- function addressBook
       return addressBook

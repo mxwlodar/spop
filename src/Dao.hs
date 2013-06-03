@@ -226,14 +226,14 @@ showContacts (p:ps) = do
             
 
 -- wyswietla kontakt
-showContact (Person id firstName lastName companyName phone email birthDay []) = do
+showContact (Person id firstName lastName companyName phone email birthDay groups) = do
             putStrLn ("id: " ++ (show id))
             putStrLn ("Imię i nazwisko: " ++firstName ++ " " ++ lastName)
             putStrLn ("Firma: " ++ companyName)
             putStrLn ("Telefon: " ++ phone)
             putStrLn ("Email: " ++ email)
-            putStrLn ("Data urodzenia: " ++ (show birthDay) ++ "\n\n" )
-
+            putStrLn ("Data urodzenia: " ++ (show birthDay) )
+            putStrLn ("Grupy: " ++ (show groups) ++ "\n\n" )
 
 -- Zapis danych do pliku
 saveData addressBook = do
@@ -303,7 +303,6 @@ doAddGroup groupId groupName groups = do
 --usuwa grupe
 deleteGroupAction (AddressBook persons groups) = do
     showGroupsAction (AddressBook persons groups)
-    return (AddressBook persons groups)
     objectName <- showInputBox "Podaj id grupy"
     let groupId = parseInt ( fromJust (Just objectName) )
 
@@ -322,8 +321,135 @@ deleteGroupAction (AddressBook persons groups) = do
                     return (AddressBook persons groups)
                 else do
                     let restGroups = removeItem (fromJust maybeGroup) groups
+                    let newPersons = deleteGroup groupId persons
                     showMessageBox operationSuccessStr
-                    return (AddressBook persons restGroups)
+                    return (AddressBook newPersons restGroups)
+
+deleteGroup _ [] = []
+deleteGroup groupId (p:ps) = do
+        let newGroupList = delete groupId (getPersonGroups p)
+        let modifiedPerson = (Person (getPersonId p)
+                            ( getPersonFirstName p)
+                            ( getPersonLastName p)
+                            ( getPersonCompanyName p)
+                            ( getPersonPhoneNumber p)
+                            ( getPersonEmail p)
+                            ( getPersonBirthday p)
+                            ( newGroupList)
+                            )
+        modifiedPerson : (deleteGroup groupId ps)
+
+
+--dodaje osobe do grupy
+addPersonToGroup (AddressBook persons groups) = do
+    showGroupsAction (AddressBook persons groups)
+    objectName <- showInputBox "Podaj id osoby"
+    let id = parseInt ( fromJust (Just objectName) )
+
+    if (id == 0)
+        then do
+            showError "Podano nieprawidłowy identyfikator osoby"
+            showMessageBox operationFailedStr
+            return (AddressBook persons groups)
+        else do
+            let maybePerson = getPersonById id persons
+
+            if ( isNothing maybePerson )
+                then do
+                    showError "Nie znaleziono osoby o wskazanym identyfikatorze"
+                    showMessageBox operationFailedStr
+                    return (AddressBook persons groups)
+                else do
+                    objectName2 <- showInputBox "Podaj id grupy"
+                    let groupId = parseInt ( fromJust (Just objectName2) )
+                    
+                    if (groupId == 0)
+                        then do
+                            showError "Podano nieprawidłowy identyfikator grupy"
+                            showMessageBox operationFailedStr
+                            return (AddressBook persons groups)
+                        else do
+                            let maybeGroup = getGroupById groupId groups
+
+                            if ( isNothing maybeGroup )
+                                then do
+                                    showError "Nie znaleziono grupy o wskazanym identyfikatorze"
+                                    showMessageBox operationFailedStr
+                                    return (AddressBook persons groups)
+                                else do
+                                    if (elem groupId (getPersonGroups (fromJust maybePerson)))
+                                        then do
+                                            showError "Uzytkownik juz nalezy do tej grupy"
+                                            showMessageBox operationFailedStr
+                                            return (AddressBook persons groups)
+                                        else do
+                                            let person = fromJust maybePerson
+                                            let newGroupList = groupId : (getPersonGroups person)
+                                            let index = fromJust( elemIndex person persons)
+                                            let modifiedPerson = (Person (getPersonId person)
+                                                                ( getPersonFirstName person)
+                                                                ( getPersonLastName person)
+                                                                ( getPersonCompanyName person)
+                                                                ( getPersonPhoneNumber person)
+                                                                ( getPersonEmail person)
+                                                                ( getPersonBirthday person)
+                                                                ( newGroupList)
+                                                                )
+                                            let modifiedPersons = replaceNth index modifiedPerson persons
+                                            showMessageBox operationSuccessStr
+                                            return (AddressBook modifiedPersons  groups)
+
+--usuwa osobe z grupy
+deletePersonFromGroup (AddressBook persons groups) = do
+    objectName <- showInputBox "Podaj id osoby"
+    let id = parseInt ( fromJust (Just objectName) )
+
+    if (id == 0)
+        then do
+            showError "Podano nieprawidłowy identyfikator osoby"
+            showMessageBox operationFailedStr
+            return (AddressBook persons groups)
+        else do
+            let maybePerson = getPersonById id persons
+
+            if ( isNothing maybePerson )
+                then do
+                    showError "Nie znaleziono osoby o wskazanym identyfikatorze"
+                    showMessageBox operationFailedStr
+                    return (AddressBook persons groups)
+                else do
+                    showContact (fromJust maybePerson)
+                    objectName2 <- showInputBox "Podaj id grupy"
+                    let groupId = parseInt ( fromJust (Just objectName2) )
+                    
+                    if (groupId == 0)
+                        then do
+                            showError "Podano nieprawidłowy identyfikator grupy"
+                            showMessageBox operationFailedStr
+                            return (AddressBook persons groups)
+                        else do
+                            if (notElem groupId (getPersonGroups (fromJust maybePerson)))
+                                then do
+                                    showError "Uzytkownik nie nalezy do tej grupy"
+                                    showMessageBox operationFailedStr
+                                    return (AddressBook persons groups)
+                                else do
+                                let person = fromJust maybePerson
+                                let newGroupList = delete groupId (getPersonGroups person)
+                                let index = fromJust( elemIndex person persons)
+                                let modifiedPerson = (Person (getPersonId person)
+                                                    ( getPersonFirstName person)
+                                                    ( getPersonLastName person)
+                                                    ( getPersonCompanyName person)
+                                                    ( getPersonPhoneNumber person)
+                                                    ( getPersonEmail person)
+                                                    ( getPersonBirthday person)
+                                                    ( newGroupList)
+                                                    )
+                                let modifiedPersons = replaceNth index modifiedPerson persons
+                                showMessageBox operationSuccessStr
+                                return (AddressBook modifiedPersons  groups)
+                               
 
 -- wyswietlenie cala ksiazke adresowa
 showAddressBookAction (AddressBook persons groups) = do
